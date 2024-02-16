@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class LauncherSubsystem extends SubsystemBase {
 
@@ -24,18 +25,18 @@ public class LauncherSubsystem extends SubsystemBase {
 
   public Command launchCommand() {
     
-    throttle(leftCIMMotor, launcherController.getRightTriggerAxis());
-    throttle(rightCIMMotor, launcherController.getRightTriggerAxis());
+    Launch(leftCIMMotor);
+    Launch(rightCIMMotor);
 
     return runOnce(
         () -> {
         });
   }
 
-  public void throttle(PWMSparkMax motor, double inputValue){
-    double gasValue = 0;
-    gasValue = 1 * inputValue;
-    motor.set(gasValue);
+  public void Launch(PWMSparkMax motor){
+    motor.set(1);
+    new WaitCommand(3.5);
+    motor.set(0);
   }
 
   public boolean exampleCondition() {

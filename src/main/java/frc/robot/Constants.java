@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -27,7 +28,15 @@ public final class Constants {
   }
 
   public static final int CHASSIS_CONTROLLER_PORT = 2; // Port number for the chassis controller
-  public static final int LEFT_MOTOR_GROUP = 1;
-  public static final int RIGHT_MOTOR_GROUP = 1;
+  public static final int LF_MOTOR_CHANNEL = 1;
+  public static final int RF_MOTOR_CHANNEL = 1;
+  public static final int LR_MOTOR_CHANNEL = 1;
+  public static final int RR_MOTOR_CHANNEL = 1;
 
+  public static final VictorSP LF_MOTOR = new VictorSP(LF_MOTOR_CHANNEL);
+  public static final VictorSP RF_MOTOR = new VictorSP(RF_MOTOR_CHANNEL);
+  public static final VictorSP LR_MOTOR = new VictorSP(LR_MOTOR_CHANNEL);
+  public static final VictorSP RR_MOTOR = new VictorSP(RR_MOTOR_CHANNEL);
+
+  public static final DifferentialDrive ROBOT_DRIVER = new DifferentialDrive(LF_MOTOR, RF_MOTOR);
 }
