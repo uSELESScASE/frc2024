@@ -4,9 +4,16 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.LauncherSubsystem;
+import frc.robot.subsystems.IntakeEncoder;
+import frc.robot.subsystems.Lift;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -16,8 +23,15 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-
-  private RobotContainer m_robotContainer;
+  private XboxController firstDriverController;
+  private XboxController secondDriverController;
+  private Drivetrain m_drivetrain_test;
+  private Lift m_lift_test;
+  private LauncherSubsystem m_launcher;
+  private DifferentialDrive m_front_drive;
+  private DifferentialDrive m_rear_drive;
+  private IntakeEncoder m_intake_encoder;
+  //private VictorTest m_test;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -27,7 +41,15 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    firstDriverController = new XboxController(Constants.ControllersConstants.FIRST_DRIVERS_CONTROLLER);
+    secondDriverController = new XboxController(Constants.ControllersConstants.SECOND_DRIVERS_CONTROLLER);
+    m_launcher = new LauncherSubsystem();
+    m_lift_test = new Lift();
+    m_intake_encoder = new IntakeEncoder();
+    m_drivetrain_test = new Drivetrain();
+    m_front_drive = Constants.FRONT_DRIVE;
+    m_rear_drive = Constants.REAR_DRIVE;
+    //m_test = new VictorTest();
   }
 
   /**
@@ -56,8 +78,6 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -68,30 +88,47 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {}
 
-  @Override
+  @Override//
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
+
   }
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    double degree = firstDriverController.getRightX();
+    double throttle = firstDriverController.getLeftTriggerAxis();
+    double spd =  firstDriverController.getLeftY();
+    double rotation = firstDriverController.getLeftX();
+    double drivetrainthrottle = firstDriverController.getRightTriggerAxis();
+    // encoderInst.RobotIntake(encoderInst.intakeNEO);
+    m_intake_encoder.IntakeLift(degree,throttle);
+    m_drivetrain_test.arcadeDrv( -spd , -rotation, drivetrainthrottle, m_front_drive);
+    m_drivetrain_test.arcadeDrv( -spd , -rotation, drivetrainthrottle, m_rear_drive);
+    m_lift_test.LiftRobot(m_lift_test.leftLiftCIM, m_lift_test.rightLiftCIM);
+
+    m_launcher.throwValue();
+
+    if (firstDriverController.getAButtonPressed()) {
+      m_intake_encoder.IntakeStart();
+      m_launcher.startThrowing();
+    }
+
+    m_intake_encoder.MotorTest();
+  }
 
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+
   }
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
