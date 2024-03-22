@@ -4,16 +4,12 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.LauncherSubsystem;
-import frc.robot.subsystems.IntakeEncoder;
-import frc.robot.subsystems.Lift;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.ShootingSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -22,16 +18,14 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
  * project.
  */
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
   private XboxController firstDriverController;
   private XboxController secondDriverController;
-  private Drivetrain m_drivetrain_test;
-  private Lift m_lift_test;
-  private LauncherSubsystem m_launcher;
-  private DifferentialDrive m_front_drive;
-  private DifferentialDrive m_rear_drive;
-  private IntakeEncoder m_intake_encoder;
-  //private VictorTest m_test;
+  private DrivetrainSubsystem m_drivetrain_test;
+  private ShootingSubsystem m_intake_encoder;
+  private double pos;
+  private int task;
+  private int povValue;
+  private Timer timer;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -43,13 +37,13 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     firstDriverController = new XboxController(Constants.ControllersConstants.FIRST_DRIVERS_CONTROLLER);
     secondDriverController = new XboxController(Constants.ControllersConstants.SECOND_DRIVERS_CONTROLLER);
-    m_launcher = new LauncherSubsystem();
-    m_lift_test = new Lift();
-    m_intake_encoder = new IntakeEncoder();
-    m_drivetrain_test = new Drivetrain();
-    m_front_drive = Constants.FRONT_DRIVE;
-    m_rear_drive = Constants.REAR_DRIVE;
-    //m_test = new VictorTest();
+
+
+    m_intake_encoder = new ShootingSubsystem();
+    m_drivetrain_test = new DrivetrainSubsystem();
+
+    pos = 0;
+    povValue = -1;
   }
 
   /**
@@ -68,25 +62,88 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
   }
 
-  /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {}
 
   @Override
   public void disabledPeriodic() {}
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+
   @Override
   public void autonomousInit() {
     // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    timer = new Timer();
+
+    timer.reset();
+    timer.start();
+
+    task = -1;
   }
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    System.out.println(timer.get());
+
+    m_intake_encoder.autoPos(pos);
+    m_intake_encoder.getPOVValues(povValue);
+
+    // Task Definers
+    if (0 < timer.get() && timer.get() < 1.5) { // 1.5 sec
+      task = 1;
+    }
+    if (1.5 < timer.get() && timer.get() < 2) { // 0.5 sec
+      task = 2;
+    }
+    if (2 < timer.get() && timer.get() < 3.5) { // 1.5 sec
+      task = 3;
+    }
+    if (3.5 < timer.get() && timer.get() < 4.5) { // 1 sec
+      task = 4;
+    }
+    if (4.5 < timer.get() && timer.get() < 6) { // 1.5 sec
+      task = 5;
+    }
+    if (6.5 < timer.get() && timer.get() < 7) { // 0.5 sec
+      task = 6;
+    }
+    if (7 < timer.get() && timer.get() < 8.5) { // 1.5 sec
+      task = 7;
+    }
+    if (8.5 < timer.get()) { // Last Task
+      task = 8;
+    }
+    System.out.println(task);
+
+    // Task Values
+    switch (task) {
+      case 1 -> { // Intake Down & Shooter Extrude
+        povValue = 0;
+        pos = -1.1;
+      }
+      case 2 -> {
+        povValue = -1;
+        m_drivetrain_test.driveBoth(-0.7, 0, 1);
+      }
+      case 3 -> m_drivetrain_test.driveBoth(0, -0.7, 1);
+      case 4 -> povValue = 270;
+      case 5 -> {
+        povValue = -1;
+        m_drivetrain_test.driveBoth(0, 0.7, 1);
+        pos = 0;
+      }
+      case 6 -> {
+        m_drivetrain_test.driveBoth(0.7, 0, 1);
+        pos = 0;
+      }
+      case 8 -> pos = 0;
+      case 9 -> povValue = 45;
+      case 10 -> {
+        povValue = -1;
+        System.out.println("Program Stopped");
+      }
+    }
+  }
 
   @Override//
   public void teleopInit() {
@@ -96,29 +153,35 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    double degree = firstDriverController.getRightX();
-    double throttle = firstDriverController.getLeftTriggerAxis();
-    double spd =  firstDriverController.getLeftY();
-    double rotation = firstDriverController.getLeftX();
+   
+    double spd =  firstDriverController.getLeftX();
+    double rotation = firstDriverController.getLeftY();
     double drivetrainthrottle = firstDriverController.getRightTriggerAxis();
-    // encoderInst.RobotIntake(encoderInst.intakeNEO);
-    m_intake_encoder.IntakeLift(degree,throttle);
-    m_drivetrain_test.arcadeDrv( -spd , -rotation, drivetrainthrottle, m_front_drive);
-    m_drivetrain_test.arcadeDrv( -spd , -rotation, drivetrainthrottle, m_rear_drive);
-    m_lift_test.LiftRobot(m_lift_test.leftLiftCIM, m_lift_test.rightLiftCIM);
+    
+    povValue = secondDriverController.getPOV();
+   
+    m_drivetrain_test.driveBoth(spd, rotation, drivetrainthrottle);
+    m_intake_encoder.autoPos(pos);
+    // Kazim's Controller
+    m_intake_encoder.getPOVValues(povValue);
 
-    m_launcher.throwValue();
-
-    if (firstDriverController.getAButtonPressed()) {
-      m_intake_encoder.IntakeStart();
-      m_launcher.startThrowing();
+    //Egemen's Controller
+    if (firstDriverController.getBButton()) {
+      pos = 0;
     }
-
-    m_intake_encoder.MotorTest();
+    if (firstDriverController.getYButton()) {
+      //Degeri kontrol et
+      pos = -0.45;
+    }
+    if (firstDriverController.getXButton()){
+      //Degeri kontrol et
+      pos = -1.1;
+    }
   }
 
   @Override
   public void testInit() {
+    
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
 
@@ -127,7 +190,9 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-    
+    double rotation = firstDriverController.getLeftY();
+
+    m_intake_encoder.encoderReadout(rotation);
   }
 
   /** This function is called once when the robot is first started up. */
