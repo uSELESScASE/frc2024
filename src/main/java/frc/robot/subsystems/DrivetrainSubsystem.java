@@ -7,15 +7,12 @@ public class DrivetrainSubsystem {
     private final DifferentialDrive frontDrive = Constants.FRONT_DRIVE;
     private final DifferentialDrive rearDrive = Constants.REAR_DRIVE;
     
-    public void arcadeDrv(double spd, double rotation, double drivethrottle, DifferentialDrive drive){
-        spd *= drivethrottle;   
-        rotation *= drivethrottle;
-
+    public void arcadeDrv(double spd, double rotation, DifferentialDrive drive){
         drive.arcadeDrive(spd, rotation, true);
     }
 
-    public void driveBoth(double spd, double rotation, double drivethrottle){
-        arcadeDrv(spd,rotation,drivethrottle,frontDrive);
-        arcadeDrv(spd,rotation,drivethrottle,rearDrive);
+    public void driveBoth(double spd, double rotation){
+        arcadeDrv(spd,rotation,frontDrive);
+        arcadeDrv(spd,rotation,rearDrive);
     }
 }

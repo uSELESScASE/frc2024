@@ -28,7 +28,7 @@ public class ShootingSubsystem extends SubsystemBase {
 
   public void autoPos(double desiredPos){
     double getPos = encoder.getPosition();
-      double speed = (getPos - desiredPos) * 0.7;
+    double speed = (getPos - desiredPos) * 0.7;
 
     liftIntakeNEO.set(-speed);
   }

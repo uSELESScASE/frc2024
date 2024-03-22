@@ -123,17 +123,17 @@ public class Robot extends TimedRobot {
       }
       case 2 -> {
         povValue = -1;
-        m_drivetrain_test.driveBoth(-0.7, 0, 1);
+        m_drivetrain_test.driveBoth(-0.7, 0);
       }
-      case 3 -> m_drivetrain_test.driveBoth(0, -0.7, 1);
+      case 3 -> m_drivetrain_test.driveBoth(0, -0.7);
       case 4 -> povValue = 270;
       case 5 -> {
         povValue = -1;
-        m_drivetrain_test.driveBoth(0, 0.7, 1);
+        m_drivetrain_test.driveBoth(0, 0.7);
         pos = 0;
       }
       case 6 -> {
-        m_drivetrain_test.driveBoth(0.7, 0, 1);
+        m_drivetrain_test.driveBoth(0.7, 0);
         pos = 0;
       }
       case 8 -> pos = 0;
@@ -154,13 +154,12 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
    
-    double spd =  firstDriverController.getLeftX();
+    double spd =  firstDriverController.getRightX();
     double rotation = firstDriverController.getLeftY();
-    double drivetrainthrottle = firstDriverController.getRightTriggerAxis();
     
     povValue = secondDriverController.getPOV();
    
-    m_drivetrain_test.driveBoth(spd, rotation, drivetrainthrottle);
+    m_drivetrain_test.driveBoth(spd, rotation);
     m_intake_encoder.autoPos(pos);
     // Kazim's Controller
     m_intake_encoder.getPOVValues(povValue);

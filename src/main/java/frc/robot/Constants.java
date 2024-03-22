@@ -28,10 +28,6 @@ public final class Constants {
       public static final int LEFT_CIM_MOTOR = 7; 
       public static final int RIGHT_CIM_MOTOR = 4; 
   }
-  public static final class LiftsConstant{
-      public static final int LL_CIM_MOTOR = 1; //Left Lift CIM Motor
-      public static final int RL_CIM_MOTOR = 8; // Right Lift CIM Motor 
-  }
 
   public static final int LF_MOTOR_CHANNEL = 5;
   public static final int RF_MOTOR_CHANNEL = 8;
